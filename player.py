@@ -31,7 +31,7 @@ class Player:
         }
 
         self.character = characterName
-        self.location = (0,0)       #this will need to change based off of which character they are
+        self.location = (8,7)       #this will need to change based off of which character they are
         self.cards = hand
 
         for i in self.cards:
@@ -44,8 +44,65 @@ class Player:
 
 
     #todo
-    def get_valid_moves(self):
-        return
+    def get_valid_moves(self, board, doors, roll, loc):
+        moves = []
+        room = board[loc[0]][loc[1]]
+
+        if roll == 0:
+            return moves
+        
+        #if in room check for passages
+        if room == 1:
+            moves.append((18, 19))
+        elif room == 9:
+            moves.append((3, 6))
+        elif room == 3:
+            moves.append((19,4))
+        elif room == 7:
+            moves.append((5,17))
+        
+        #if in a room addd all possible moves out of doors
+        if room != -1 and room != 0:
+            for i in doors:
+                if i[1] == room:
+                    #not sure if this should be roll-1 or just roll
+                    moves = moves + self.get_valid_moves(board, doors, roll-1, (i[0]))
+
+        
+        #if in hallway walk around
+        if room == 0:
+            a, b = loc
+            if a < 24 and board[a+1][b] == 0:
+                if roll == 1:
+                    moves.append((a+1, b))
+                else:
+                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a+1, b))
+
+            if a > 0 and board[a-1][b] == 0:
+                if roll == 1:
+                    moves.append((a-1, b))
+                else:
+                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a-1, b))
+
+            if b < 23 and board[a][b+1] == 0:
+                if roll == 1:
+                    moves.append((a, b+1))
+                else:
+                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a, b+1))
+
+            if b > 0 and board[a][b-1] == 0:
+                if roll == 1:
+                    moves.append((a, b-1))
+                else:
+                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a, b-1))
+
+            #if neighbor square is a door go in room
+            for i in doors:
+                if (a+1, b) == i[2] or (a-1, b) == i[2] or (a, b+1) == i[2] or (a, b-1) == i[2]:
+                    moves.append(i[2])
+                    break
+            
+        return list(set(moves))
 
     #todo
     def make_move(self):
