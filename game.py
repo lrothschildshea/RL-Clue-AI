@@ -33,6 +33,14 @@ class Game:
 
     #todo
     def run_game(self):
+        #while game not over
+            #if player wants to guess solution let them
+                #if correct they win
+                #else show cards to other players
+            #player makes move
+            #if in room make accusation
+            #record knowledge
+            #next player
         return
             
 

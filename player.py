@@ -1,3 +1,4 @@
+#this is a bad AI that makes randomish moves but can at least play the game
 
 class Player:
 
@@ -104,10 +105,44 @@ class Player:
             
         return list(set(moves))
 
-    #todo
-    def make_move(self):
-        return
+    # makes random move at the moment
+    def make_move(self, board, doors, roll, loc):
+        moves = get_valid_moves(board, doors, roll, loc)
+        self.location = moves[random.randint(0, len(move)-1)]
+        
     
-    #todo
-    def guess_solution(self):
-        return
+    #makes random accusation from room asking for things it doesnt know
+    def make_accusation(self, board):
+        room = board[self.location[0]][self.location[1]]
+        
+        if room == 1:
+            room = "Study"
+        elif room == 2:
+            room = "Hall"
+        elif room == 3:
+            room = "Lounge"
+        elif room == 4:
+            room = "Library"
+        elif room == 5:
+            room = "Dining Room"
+        elif room == 6:
+            room = "Billiard Room"
+        elif room == 7:
+            room = "Conservatory"
+        elif room == 8:
+            room = "Ballroom"
+        else:
+            room = "Kitchen"
+
+        w = []
+        for key in self.weapons:
+            if weapons[key] == 0:
+                w.append(key)
+        
+        p = []
+        for key in self.people:
+            if people[key] == 0:
+                p.append(key)
+        
+        return (room, w[random.randint(0, len(w)-1)], p[random.randint(0, len(p)-1)])
+        
