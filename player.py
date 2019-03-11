@@ -1,3 +1,5 @@
+import random
+
 #this is a bad AI that makes randomish moves but can at least play the game
 
 class Player:
@@ -32,8 +34,21 @@ class Player:
         }
 
         self.character = characterName
-        self.location = (8,7)       #this will need to change based off of which character they are
         self.cards = hand
+
+        if self.character == "Mr. Green":
+            self.location = (24, 9)
+        elif self.character == "Colonel Mustard":
+            self.location = (7, 23)
+        elif self.character == "Mrs. Peacock":
+            self.location = (18, 0)
+        elif self.character == "Professor Plum":
+            self.location = (5, 0)
+        elif self.character == "Ms. Scarlet":
+            self.location = (0, 16)
+        else:
+            self.location = (24, 14)
+
 
         for i in self.cards:
             if i in self.rooms:
@@ -43,8 +58,7 @@ class Player:
             else:
                 self.people[i] = 1
 
-
-    #todo
+    # NEED TO PREVENT CHARACTERS FROM MOVING TO OICCUPIED HALLWAY SPOTS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     def get_valid_moves(self, board, doors, roll, loc):
         moves = []
         room = board[loc[0]][loc[1]]
@@ -66,8 +80,10 @@ class Player:
         if room != -1 and room != 0:
             for i in doors:
                 if i[1] == room:
-                    #not sure if this should be roll-1 or just roll
-                    moves = moves + self.get_valid_moves(board, doors, roll-1, (i[0]))
+                    if roll == 1:
+                        moves.append(i[0])
+                    else:
+                        moves = moves + self.get_valid_moves(board, doors, roll-1, (i[0]))
 
         
         #if in hallway walk around
@@ -106,9 +122,23 @@ class Player:
         return list(set(moves))
 
     # makes random move at the moment
-    def make_move(self, board, doors, roll, loc):
-        moves = get_valid_moves(board, doors, roll, loc)
-        self.location = moves[random.randint(0, len(move)-1)]
+    def make_move(self, board, doors, roll, loc, other_players):
+        if self.should_guess_solution():
+            return self.get_soln_guess()
+
+        moves = self.get_valid_moves(board, doors, roll, loc)
+        self.location = moves[random.randint(0, len(moves)-1)]
+        if board[self.location[0]][self.location[1]] > 0:
+            acc = self.make_accusation(board)
+            
+            #ask other players for a card
+            for i in other_players:
+                response = i.acc_respond(acc)
+                if response != None:
+                    self.record_cards([response])
+                    break
+        return None
+
         
     
     #makes random accusation from room asking for things it doesnt know
@@ -136,13 +166,68 @@ class Player:
 
         w = []
         for key in self.weapons:
-            if weapons[key] == 0:
+            if self.weapons[key] == 0:
                 w.append(key)
         
         p = []
         for key in self.people:
-            if people[key] == 0:
+            if self.people[key] == 0:
                 p.append(key)
         
         return (room, w[random.randint(0, len(w)-1)], p[random.randint(0, len(p)-1)])
         
+
+    #show random card from accusation if you have one
+    def acc_respond(self, accusation):
+        has = []
+        if accusation[0] in self.cards:
+            has.append(accusation[0])
+        if accusation[1] in self.cards:
+            has.append(accusation[1])
+        if accusation[2] in self.cards:
+            has.append(accusation[2])
+        
+        if len(has) == 0:
+            return None
+        else:
+            return has[random.randint(0, len(has)-1)]
+
+    def should_guess_solution(self):
+        count = 3
+        for i in self.rooms:
+            count += self.rooms[i]
+        for i in self.weapons:
+            count += self.weapons[i]
+        for i in self.people:
+            count += self.people[i]
+
+        #might need to reduce probability that they guess so they play longer consistently
+        return random.random()**100 > (21-count)/21
+    
+    def get_soln_guess(self):
+        r = []
+        for key in self.rooms:
+            if self.rooms[key] == 0:
+                r.append(key)
+
+        w = []
+        for key in self.weapons:
+            if self.weapons[key] == 0:
+                w.append(key)
+        
+        p = []
+        for key in self.people:
+            if self.people[key] == 0:
+                p.append(key)
+        
+        return (r[random.randint(0, len(r)-1)], w[random.randint(0, len(w)-1)], p[random.randint(0, len(p)-1)])
+
+    def record_cards(self, hand):
+        for i in hand:
+            if i in self.rooms:
+                self.rooms[i] = 1
+            elif i in self.weapons:
+                self.weapons[i] = 1
+            else:
+                self.people[i] = 1
+    
