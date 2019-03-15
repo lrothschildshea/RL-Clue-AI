@@ -58,8 +58,7 @@ class Player:
             else:
                 self.people[i] = 1
 
-    # NEED TO PREVENT CHARACTERS FROM MOVING TO OICCUPIED HALLWAY SPOTS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    def get_valid_moves(self, board, doors, roll, loc):
+    def get_valid_moves(self, board, doors, roll, loc, other_players):
         moves = []
         room = board[loc[0]][loc[1]]
 
@@ -83,7 +82,7 @@ class Player:
                     if roll == 1:
                         moves.append(i[0])
                     else:
-                        moves = moves + self.get_valid_moves(board, doors, roll-1, (i[0]))
+                        moves = moves + self.get_valid_moves(board, doors, roll-1, (i[0]), other_players)
 
         
         #if in hallway walk around
@@ -93,25 +92,25 @@ class Player:
                 if roll == 1:
                     moves.append((a+1, b))
                 else:
-                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a+1, b))
+                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a+1, b), other_players)
 
             if a > 0 and board[a-1][b] == 0:
                 if roll == 1:
                     moves.append((a-1, b))
                 else:
-                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a-1, b))
+                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a-1, b), other_players)
 
             if b < 23 and board[a][b+1] == 0:
                 if roll == 1:
                     moves.append((a, b+1))
                 else:
-                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a, b+1))
+                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a, b+1), other_players)
 
             if b > 0 and board[a][b-1] == 0:
                 if roll == 1:
                     moves.append((a, b-1))
                 else:
-                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a, b-1))
+                    moves = moves + self.get_valid_moves(board, doors, roll-1, (a, b-1), other_players)
 
             #if neighbor square is a door go in room
             for i in doors:
@@ -119,18 +118,34 @@ class Player:
                     moves.append(i[2])
                     break
             
-        return list(set(moves))
+        moves = list(set(moves))
+        # do not allow players to be in same hallway tile
+        for i in other_players:
+            if board[i.location[0]][i.location[1]] == 0 and i.location in moves:
+                moves.remove(i.location)
+
+        return moves
 
     # makes random move at the moment
     def make_move(self, board, doors, roll, loc, other_players):
         if self.should_guess_solution():
             return self.get_soln_guess()
 
-        moves = self.get_valid_moves(board, doors, roll, loc)
-        self.location = moves[random.randint(0, len(moves)-1)]
+        moves = self.get_valid_moves(board, doors, roll, loc, other_players)
+
+        #if no moves then the player has been boxed in by other players. Game does not seem to be defined for this behavior so do not move.
+        if len(moves) != 0:
+            self.location = moves[random.randint(0, len(moves)-1)]
+
         if board[self.location[0]][self.location[1]] > 0:
             acc = self.make_accusation(board)
             
+            #move accused player to room
+            for i in other_players:
+                if i.character == acc[2]:
+                    i.location = self.location
+                    break
+
             #ask other players for a card
             for i in other_players:
                 response = i.acc_respond(acc)
@@ -201,8 +216,9 @@ class Player:
         for i in self.people:
             count += self.people[i]
 
-        #might need to reduce probability that they guess so they play longer consistently
-        return random.random()**100 > (21-count)/21
+        if count < 12:
+            return False
+        return random.random()**100 > ((21-count)**.2)/(21**.2)
     
     def get_soln_guess(self):
         r = []
