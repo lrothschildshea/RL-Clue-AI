@@ -146,9 +146,85 @@ class Player:
                 im a bit iffy on if we want location becuase it increases state space a ton (maybe do room number instead of actual coords on board)
             
             actions will probably just be the accusation/solution guess you make at that spot
+            ('a' or 's' to indicate accusation or solution, guess)
 
-            I think this player should make random moves while training and then we make a similar player who actually picks the best moves to play
+            I *think* this player should make random moves while training and then we make a similar player who actually picks the best moves to play
+            
+            actions where you win should get a large positive reward
+            actions where you lose should get a large negative reward
+            actions where you learn something should get a small positive reward
+            actions where nothing interesting happens should get no reward
             '''
+
+        moves = self.get_valid_moves(board, doors, roll, loc, other_players)
+        accusations = self.get_valid_accusations(board)
+        solution_guesses = self.get_solution_guesses()
+        #actions = all possible (move, 'a', accusation) or (move, 's', solution)
+        #actions must include the option of not guessing when in the hallway
+        #update q value for (state, action)
+        #make move
+
+
+
+    def get_valid_accusations(self, board):
+        room = board[self.location[0]][self.location[1]]
+        
+        if room == 1:
+            room = "Study"
+        elif room == 2:
+            room = "Hall"
+        elif room == 3:
+            room = "Lounge"
+        elif room == 4:
+            room = "Library"
+        elif room == 5:
+            room = "Dining Room"
+        elif room == 6:
+            room = "Billiard Room"
+        elif room == 7:
+            room = "Conservatory"
+        elif room == 8:
+            room = "Ballroom"
+        else:
+            room = "Kitchen"
+
+        w = []
+        for key in self.weapons:
+            w.append(key)
+        
+        p = []
+        for key in self.people:
+            p.append(key)
+
+        accusations = []
+        
+        for i in w:
+            for j in p:
+                accusations.append((room, i, j))
+        return accusations
+        
+
+    def get_solution_guesses(self):
+        r = []
+        for key in self.rooms:
+            r.append(key)
+
+        w = []
+        for key in self.weapons:
+            w.append(key)
+        
+        p = []
+        for key in self.people:
+            p.append(key)
+
+        solutions = []
+
+        for i in r:
+            for j in w:
+                for k in p:
+                    solutions.append((i, j, k))
+
+        return solutions
 
     #might want to redo this to make it better - not sure how at the moment
     def acc_respond(self, accusation):
