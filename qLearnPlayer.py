@@ -157,17 +157,48 @@ class Player:
             '''
 
         moves = self.get_valid_moves(board, doors, roll, loc, other_players)
-        accusations = self.get_valid_accusations(board)
         solution_guesses = self.get_solution_guesses()
-        #actions = all possible (move, 'a', accusation) or (move, 's', solution)
-        #actions must include the option of not guessing when in the hallway
+
+        actions = []
+        for i in moves:
+            #accusations available for that move
+            accusations = self.get_valid_accusations(board, i)
+            for j in accusations:
+                actions.append((i, 'a', j))
+            
+            #solution guesses
+            for j in solution_guesses:
+                actions.append((i, 's', j))
+
+            #can do nothing if in hallway
+            if board[i[0]][i[1]] == 0:
+                actions.append((i, 'n', (0, 0, 0)))
+
+        #make state variable
+        r = []
+        for i in self.rooms:
+            if self.rooms[i] == 1:
+                r.append(i)
+        
+        w = 0
+        for i in self.weapons:
+            w += self.weapons[i]
+
+        p = 0
+        for i in self.people:
+            p += self.people[i]
+        
+        state = (r, w, p, board[self.location[0]][self.location[1]])
+
+        
+    
         #update q value for (state, action)
         #make move
 
 
 
-    def get_valid_accusations(self, board):
-        room = board[self.location[0]][self.location[1]]
+    def get_valid_accusations(self, board, loc):
+        room = board[loc[0]][loc[1]]
         
         if room == 1:
             room = "Study"
