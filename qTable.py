@@ -1,37 +1,46 @@
 from itertools import combinations
 from itertools import product
+from ast import literal_eval as make_tuple
 import sys
 
 class QTable:
     def __init__(self, rooms, weapons, people, location):
         self.table = {}
 
-        # Generate all combinations of rooms
-        all_rooms = []
-        for i in range(len(rooms) + 1):
-            cmb = combinations(rooms, i)
-            all_rooms += cmb
+        try:
+            loadable = self.read_table()
+            if loadable is not None:
+                self.table = loadable
+                self.states = list(loadable.keys())
+                self.actions = list(loadable[self.states[0]].keys())
 
-        # Take cartesian product of guessable values for guesses
-        guesses = product(rooms.keys(), weapons.keys(), people.keys())
+        except FileNotFoundError as e:
+            # Generate all combinations of rooms
+            all_rooms = []
+            for i in range(len(rooms) + 1):
+                cmb = combinations(rooms, i)
+                all_rooms += cmb
 
-        # Pair cartesian product of guesses with action type
-        self.actions = list(product(['a', 's'], guesses))
+            # Take cartesian product of guessable values for guesses
+            guesses = product(rooms.keys(), weapons.keys(), people.keys())
 
-        # Create state space value of rooms, weapon count, and people count
-        # location omitted at this time for smaller space
-        self.states = list(product(all_rooms, list(range(len(weapons) + 1)), list(range(len(people) + 1))))
+            # Pair cartesian product of guesses with action type
+            self.actions = list(product(['a', 's'], guesses))
 
-        # Create the keys to be used in the QTable dictionary
-        q_states = product(self.states, self.actions)
-        for s in self.states:
-            self.table[s] = {}
-            for a in self.actions:
-                self.table[s][a] = 0
+            # Create state space value of rooms, weapon count, and people count
+            # location omitted at this time for smaller space
+            self.states = list(product(all_rooms, list(range(len(weapons) + 1)), list(range(len(people) + 1))))
 
-        # self.write_table()
+            # Create the keys to be used in the QTable dictionary
+            q_states = product(self.states, self.actions)
+            for s in self.states:
+                self.table[s] = {}
+                for a in self.actions:
+                    self.table[s][a] = 0
 
-    def write_table(self, filename="qtable_out.tsv"):
+            self.write_table()
+
+    def write_table(self, filename="qtable_init.tsv"):
         first_line = True
         head = ["-"]
 
@@ -47,3 +56,24 @@ class QTable:
                     file.write("%s\n" % ("\t".join(head)))
                     first_line = False
                 file.write("%s\n" % ("\t".join(line)))
+
+    def read_table(self, filename="qtable_init.tsv"):
+        first_line = True
+        table = {}
+        actions = []
+        with open(filename, 'r') as file:
+            for line in file:
+                if first_line:
+                    actions = line.split("\t")[1:]
+                    first_line = False
+                else:
+                    line_data = line.split("\t")
+                    state = make_tuple(line_data[0])
+                    values = line_data[1:]
+                    if state not in table.keys():
+                        table[state] = {}
+
+                    for (i, a) in enumerate(actions):
+                        table[state][a] = values[i]
+
+        return table
