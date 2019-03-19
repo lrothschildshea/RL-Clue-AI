@@ -1,6 +1,6 @@
 from cards import Cards
-from qLearnPlayer import Player
-# from player import Player
+from qLearnPlayer import Player as QPlayer
+from player import Player
 import random, sys
 
 class Game:
@@ -13,15 +13,17 @@ class Game:
     weapons = ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"]
     characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
 
-    def __init__(self, numberOfPlayers):
+    def __init__(self, numberOfPlayers, playerType=None):
         if numberOfPlayers > 1 and numberOfPlayers < 7:
             self.numPlayers = numberOfPlayers
         
         self.cards, self.solution = Cards(self.numPlayers).deal_cards()
         self.players = []
         for i in range(self.numPlayers):
-            # self.players.append(Player(self.characters[i], self.cards[i]))
-            self.players.append(Player(self.characters[i], self.cards[i]))
+            if playerType == "qlearn":
+                self.players.append(QPlayer(self.characters[i], self.cards[i]))
+            else:
+                self.players.append(Player(self.characters[i], self.cards[i]))
 
         self.board = self.init_board()
         

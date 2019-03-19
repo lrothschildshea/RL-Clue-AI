@@ -8,7 +8,7 @@ characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", 
 
 for i in range(num_games):
     print("Playing Game:", i+1)
-    game = Game(num_players)
+    game = Game(num_players, playerType='')
     results[i] = game.run_game()
     print()
 
