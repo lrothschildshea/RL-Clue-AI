@@ -1,7 +1,7 @@
-
+from qTable import QTable
+import sys
 
 class Player:
-
     def __init__(self, characterName, hand):
         self.rooms = {
             "Ballroom": 0,
@@ -47,6 +47,7 @@ class Player:
         else:
             self.location = (24, 14)
 
+        self.qtable = QTable(self.rooms, self.weapons, self.people, self.location)
 
         for i in self.cards:
             if i in self.rooms:
@@ -55,6 +56,7 @@ class Player:
                 self.weapons[i] = 1
             else:
                 self.people[i] = 1
+
 
     def get_valid_moves(self, board, doors, roll, loc, other_players):
         moves = []
@@ -126,7 +128,7 @@ class Player:
 
 
     def make_move(self, board, doors, roll, loc, other_players):
-        pass
+        # pass
         '''
             I am thinking we should store Q as a disctionary and using the states and actions as keys.
 
@@ -179,7 +181,8 @@ class Player:
         for i in self.rooms:
             if self.rooms[i] == 1:
                 r.append(i)
-        
+        r = tuple(r)
+
         w = 0
         for i in self.weapons:
             w += self.weapons[i]
@@ -188,8 +191,12 @@ class Player:
         for i in self.people:
             p += self.people[i]
         
-        state = (r, w, p, board[self.location[0]][self.location[1]])
+        state = (r, w, p)
+        print(state)
+        # state = (r, w, p, board[self.location[0]][self.location[1]])
 
+        print(state in self.qtable.states)
+        sys.exit()
         
     
         #update q value for (state, action)
@@ -280,3 +287,9 @@ class Player:
                 self.weapons[i] = 1
             else:
                 self.people[i] = 1
+
+    def __repr__(self):
+        return "Player(\""+self.character+"\")"
+
+    def __str__(self):
+        return self.character

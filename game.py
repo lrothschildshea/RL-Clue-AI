@@ -1,6 +1,7 @@
 from cards import Cards
-from player import Player
-import random
+from qLearnPlayer import Player
+# from player import Player
+import random, sys
 
 class Game:
 
@@ -19,6 +20,7 @@ class Game:
         self.cards, self.solution = Cards(self.numPlayers).deal_cards()
         self.players = []
         for i in range(self.numPlayers):
+            # self.players.append(Player(self.characters[i], self.cards[i]))
             self.players.append(Player(self.characters[i], self.cards[i]))
 
         self.board = self.init_board()
@@ -28,7 +30,6 @@ class Game:
 
         
     def run_game(self):
-
         #while game not over
         while not self.solution_guessed:
             if len(self.players) == 1:
@@ -38,12 +39,13 @@ class Game:
                 self.solution_guessed = True
                 return (len(self.players), self.players[self.currentPlayer].character)
 
-
             #this is needed in stead of removing current from a copy of players because it maintains the correct order
-            other_players = []
-            for i in range(self.currentPlayer + 1, self.currentPlayer + self.numPlayers):
-                i = i % self.numPlayers
-                other_players.append(self.players[i])
+            # other_players = []
+            # for i in range(self.currentPlayer + 1, self.currentPlayer + self.numPlayers):
+            #     i = i % self.numPlayers
+            #     other_players.append(self.players[i])
+
+            other_players = self.players[1:] + self.players[:0]
 
             #make move
             move = self.players[self.currentPlayer].make_move(self.board, self.doors, self.roll_dice(), self.players[self.currentPlayer].location, other_players)

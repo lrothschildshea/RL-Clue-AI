@@ -246,4 +246,9 @@ class Player:
                 self.weapons[i] = 1
             else:
                 self.people[i] = 1
-    
+
+    def __repr__(self):
+        return "Player("+self.character+")"
+
+    def __str__(self):
+        return self.character

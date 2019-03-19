@@ -1,7 +1,7 @@
 from game import Game
 
-num_games = 100
-num_players = 6     #between 2 and 6
+num_games = 1
+num_players = 2     #between 2 and 6
 results = [None]*num_games
 characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
 
