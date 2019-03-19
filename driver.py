@@ -1,14 +1,14 @@
 from game import Game
 
 num_games = 1
-num_players = 2     #between 2 and 6
+num_players = 1     #between 2 and 6
 results = [None]*num_games
 characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
 
 
 for i in range(num_games):
     print("Playing Game:", i+1)
-    game = Game(num_players, playerType='')
+    game = Game(num_players, playerType='qlearn')
     results[i] = game.run_game()
     print()
 

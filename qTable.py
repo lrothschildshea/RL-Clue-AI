@@ -12,12 +12,38 @@ class QTable:
             cmb = combinations(rooms, i)
             all_rooms += cmb
 
+        # Take cartesian product of guessable values for guesses
         guesses = product(rooms.keys(), weapons.keys(), people.keys())
-        self.actions = list(product(['a', 's'], guesses))
-        self.states = list(product(all_rooms, list(range(len(weapons) + 1)), list(range(len(people) + 1))))
-        q_states = product(self.states, self.actions)
-        i = 0
-        for (s, a) in q_states:
-            self.table[(s, a)] = 0
 
-        print(len(self.table))
+        # Pair cartesian product of guesses with action type
+        self.actions = list(product(['a', 's'], guesses))
+
+        # Create state space value of rooms, weapon count, and people count
+        # location omitted at this time for smaller space
+        self.states = list(product(all_rooms, list(range(len(weapons) + 1)), list(range(len(people) + 1))))
+
+        # Create the keys to be used in the QTable dictionary
+        q_states = product(self.states, self.actions)
+        for s in self.states:
+            self.table[s] = {}
+            for a in self.actions:
+                self.table[s][a] = 0
+
+        # self.write_table()
+
+    def write_table(self, filename="qtable_out.tsv"):
+        first_line = True
+        head = ["-"]
+
+        with open(filename, 'w') as file:
+            for (state, actions) in self.table.items():
+                line = [str(state)]
+                for (action, value) in actions.items():
+                    if first_line:
+                        head.append(str(action))
+                    line.append(str(value))
+
+                if first_line:
+                    file.write("%s\n" % ("\t".join(head)))
+                    first_line = False
+                file.write("%s\n" % ("\t".join(line)))
