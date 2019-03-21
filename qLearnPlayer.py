@@ -137,7 +137,41 @@ class Player:
 
         moves = self.get_valid_moves(board, doors, roll, loc, other_players)
         solution_guesses = self.get_solution_guesses()
+        actions = self.get_valid_actions(board, moves, solution_guesses)
 
+        #make state variable
+        state = self.get_state()
+        print(state)
+        # state = (r, w, p, board[self.location[0]][self.location[1]])
+        
+        print(self.qtable.table[state][actions[1]])
+
+        
+        sys.exit()
+        
+        #select action
+        max_r = self.qtable.table[state][actions[0]]
+        a = actions[0]
+        for i in actions:
+            if self.qtable.table[state][i] > max_r:
+                max_r = self.qtable.table[state][i]
+                a = i
+
+        #make move
+
+        #get new state
+        #get new state's best action
+
+
+        learning_rate = .8
+        discount_factor = .95
+
+        #update q value
+        self.qtable.table[state][a] = (1-learning_rate)*self.qtable.table[state][a] + learning_rate*(reward(state, a) + discount_factor*self.qtable.table[new_state][new_action])
+    
+
+
+    def get_valid_actions(self, board, moves, solution_guesses):
         actions = []
         for i in moves:
             #accusations available for that move
@@ -155,8 +189,10 @@ class Player:
             if board[i[0]][i[1]] == 0:
                 #actions.append((i, 'n', (0, 0, 0)))
                 actions.append(('n', (0, 0, 0)))
+        return actions
 
-        #make state variable
+
+    def get_state(self):
         r = []
         for i in self.rooms:
             if self.rooms[i] == 1:
@@ -171,42 +207,7 @@ class Player:
         for i in self.people:
             p += self.people[i]
         
-        state = (r, w, p)
-        print(state)
-        # state = (r, w, p, board[self.location[0]][self.location[1]])
-        
-        print(self.qtable.table[state][actions[1]])
-
-        
-        sys.exit()
-        
-        #select action
-        max_r = self.qtable.table[state][actions[0]]
-        a = actions[0]
-        for i in actions:
-            if self.qtable.table[state][i] > max_r:
-                max_r = self.qtable.table[state][i]
-                a = i
-
-
-
-        #get new state
-        #get new state's best action
-
-
-
-
-        learning_rate = .8
-        discount_factor = .95
-
-        #update q value
-        self.qtable.table[state][a] = (1-learning_rate)*self.qtable.table[state][a] + learning_rate*(reward(state, a) + discount_factor*self.qtable.table[new_state][new_action])
-
-
-    
-        #update q value for (state, action)
-        #make move
-
+        return (r, w, p)
 
 
     def get_valid_accusations(self, board, loc):
