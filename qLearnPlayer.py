@@ -128,35 +128,12 @@ class Player:
 
 
     def make_move(self, board, doors, roll, loc, other_players):
-        # pass
         '''
-            I am thinking we should store Q as a disctionary and using the states and actions as keys.
-
-            I think we will need (but don't quote me on this):
-                a method to list all possible accusations 
-                a method to list all possible states and accusations that could be made
-                a method to check if a state would be the end of a game
-                probably another class to make Q easy to work with (and allow all players to train with it and speed up learning)
-                    method to write it to file
-                    method to read it in from file
-                    method to easily convert a state and action into a key
-                etc.
-
-            I'm guessing state will look something like:
-                (list of rooms found, # of weapons found, # of people found, current_location)
-                
-                im a bit iffy on if we want location becuase it increases state space a ton (maybe do room number instead of actual coords on board)
-            
-            actions will probably just be the accusation/solution guess you make at that spot
-            ('a' or 's' to indicate accusation or solution, guess)
-
-            I *think* this player should make random moves while training and then we make a similar player who actually picks the best moves to play
-            
             actions where you win should get a large positive reward
             actions where you lose should get a large negative reward
             actions where you learn something should get a small positive reward
             actions where nothing interesting happens should get no reward
-            '''
+        '''
 
         moves = self.get_valid_moves(board, doors, roll, loc, other_players)
         solution_guesses = self.get_solution_guesses()
@@ -166,15 +143,18 @@ class Player:
             #accusations available for that move
             accusations = self.get_valid_accusations(board, i)
             for j in accusations:
-                actions.append((i, 'a', j))
+                #actions.append((i, 'a', j))
+                actions.append(('a', j))
             
             #solution guesses
             for j in solution_guesses:
-                actions.append((i, 's', j))
+                #actions.append((i, 's', j))
+                actions.append(('s', j))
 
             #can do nothing if in hallway
             if board[i[0]][i[1]] == 0:
-                actions.append((i, 'n', (0, 0, 0)))
+                #actions.append((i, 'n', (0, 0, 0)))
+                actions.append(('n', (0, 0, 0)))
 
         #make state variable
         r = []
@@ -194,10 +174,35 @@ class Player:
         state = (r, w, p)
         print(state)
         # state = (r, w, p, board[self.location[0]][self.location[1]])
+        
+        print(self.qtable.table[state][actions[1]])
 
-        print(state in self.qtable.states)
+        
         sys.exit()
         
+        #select action
+        max_r = self.qtable.table[state][actions[0]]
+        a = actions[0]
+        for i in actions:
+            if self.qtable.table[state][i] > max_r:
+                max_r = self.qtable.table[state][i]
+                a = i
+
+
+
+        #get new state
+        #get new state's best action
+
+
+
+
+        learning_rate = .8
+        discount_factor = .95
+
+        #update q value
+        self.qtable.table[state][a] = (1-learning_rate)*self.qtable.table[state][a] + learning_rate*(reward(state, a) + discount_factor*self.qtable.table[new_state][new_action])
+
+
     
         #update q value for (state, action)
         #make move
