@@ -42,12 +42,10 @@ class Game:
                 return (len(self.players), self.players[self.currentPlayer].character)
 
             #this is needed in stead of removing current from a copy of players because it maintains the correct order
-            # other_players = []
-            # for i in range(self.currentPlayer + 1, self.currentPlayer + self.numPlayers):
-            #     i = i % self.numPlayers
-            #     other_players.append(self.players[i])
-
-            other_players = self.players[1:] + self.players[:0]
+            other_players = []
+            for i in range(self.currentPlayer + 1, self.currentPlayer + self.numPlayers):
+                i = i % self.numPlayers
+                other_players.append(self.players[i])
 
             #make move
             move = self.players[self.currentPlayer].make_move(self.board, self.doors, self.roll_dice(), self.players[self.currentPlayer].location, other_players)
