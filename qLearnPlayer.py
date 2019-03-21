@@ -153,7 +153,7 @@ class Player:
         a = a[random.randint(0, len(a) - 1)]
 
         #explore vs exploit
-        if random.random() > .85:
+        if random.random() > .98:
             a = actions[random.randint(0, len(actions) - 1)]
 
         #make move and get reward
