@@ -1,6 +1,6 @@
 from itertools import combinations
 from itertools import product
-from ast import literal_eval as make_tuple
+import pickle
 import sys, time
 
 class QTable:
@@ -49,50 +49,12 @@ class QTable:
             self.write_table()
         # sys.exit()
 
-    def write_table(self, filename="qtable_init.tsv"):
-        first_line = True
-        head = ["-"]
+    def write_table(self, filename="qtable_init"):
+        pickle_out = open(filename+".pickle","wb")
+        pickle.dump(self.table, pickle_out)
+        pickle_out.close()
 
-        with open(filename, 'w') as file:
-            for (state, actions) in self.table.items():
-                line = [str(state)]
-                for (action, value) in actions.items():
-                    if first_line:
-                        head.append(str(action))
-                    line.append(str(value))
-
-                if first_line:
-                    file.write("%s\n" % ("\t".join(head)))
-                    first_line = False
-                file.write("%s\n" % ("\t".join(line)))
-
-    def read_table(self, filename="qtable_init.tsv"):
-        tstart = time.time()
-        tcur = tstart
-        first_line = True
-        table = {}
-        actions = []
-        count = 0
-        with open(filename, 'r') as file:
-            for line in file:
-                if first_line:
-                    actions = line.split("\t")[1:]
-                    first_line = False
-                else:
-                    line_data = line.split("\t")
-                    state = make_tuple(line_data[0])
-                    values = line_data[1:]
-                    if state not in table.keys():
-                        table[state] = {}
-
-                    for (i, a) in enumerate(actions):
-                        action = make_tuple(a)
-                        table[state][action] = float(values[i])
-
-                count += 1
-                t = time.time()
-                if (t - tcur) > 15:
-                    print("%d lines (%.4fs)" % (count , t - tstart))
-                    tcur = t
-
+    def read_table(self, filename="qtable_init"):
+        pickle_in = open(filename+".pickle","rb")
+        table = pickle.load(pickle_in)
         return table
