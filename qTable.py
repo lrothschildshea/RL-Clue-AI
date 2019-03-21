@@ -26,7 +26,7 @@ class QTable:
                 all_rooms += cmb
 
             # Take cartesian product of guessable values for guesses
-            guesses = product(rooms.keys(), weapons.keys(), people.keys())
+            guesses = product(rooms, weapons, people)
 
             # Pair cartesian product of guesses with action type
             print('making actions...')

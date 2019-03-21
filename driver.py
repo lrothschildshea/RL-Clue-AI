@@ -2,7 +2,7 @@ from game import Game
 from qTable import QTable
 import time
 
-num_games = 2000
+num_games = 3000
 num_players = 6     #between 2 and 6
 results = [None]*num_games
 
