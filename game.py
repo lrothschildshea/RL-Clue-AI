@@ -8,12 +8,13 @@ class Game:
     numPlayers = 2
     currentPlayer = 0
     solution_guessed = False
+    turn = 0
 
     rooms = ["Ballroom", "Billiard Room", "Conservatory", "Dining Room", "Hall", "Kitchen", "Library", "Lounge", "Study"]
     weapons = ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"]
     characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
 
-    def __init__(self, numberOfPlayers, playerType=None):
+    def __init__(self, numberOfPlayers, qtbl, playerType=None):
         if numberOfPlayers > 1 and numberOfPlayers < 7:
             self.numPlayers = numberOfPlayers
         
@@ -21,7 +22,7 @@ class Game:
         self.players = []
         for i in range(self.numPlayers):
             if playerType == "qlearn":
-                self.players.append(QPlayer(self.characters[i], self.cards[i]))
+                self.players.append(QPlayer(self.characters[i], self.cards[i], qtbl))
             else:
                 self.players.append(Player(self.characters[i], self.cards[i]))
 
@@ -34,6 +35,9 @@ class Game:
     def run_game(self):
         #while game not over
         while not self.solution_guessed:
+            self.turn += 1
+            if (self.turn % 10) == 0:
+                print("Turn:", self.turn)
             if len(self.players) == 1:
                 print("Only one player left. Game Over!")
                 print("Player ", self.players[self.currentPlayer].character, "has won!")
@@ -48,7 +52,7 @@ class Game:
                 other_players.append(self.players[i])
 
             #make move
-            move = self.players[self.currentPlayer].make_move(self.board, self.doors, self.roll_dice(), self.players[self.currentPlayer].location, other_players)
+            move = self.players[self.currentPlayer].make_move(self.board, self.doors, self.roll_dice(), self.players[self.currentPlayer].location, other_players, self.solution)
             #if move was to guess solution then handle guess
             if move != None:
                 if move == self.solution:

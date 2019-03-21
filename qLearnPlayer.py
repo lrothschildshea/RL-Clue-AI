@@ -1,12 +1,13 @@
 from qTable import QTable
 import sys
+import random
 
 class Player:
-    def __init__(self, characterName, hand):
+    def __init__(self, characterName, hand, qtbl):
         self.rooms = {
             "Ballroom": 0,
             "Billiard Room": 0,
-            "Conservarory": 0,
+            "Conservatory": 0,
             "Dining Room": 0,
             "Hall": 0,
             "Kitchen": 0,
@@ -47,7 +48,7 @@ class Player:
         else:
             self.location = (24, 14)
 
-        self.qtable = QTable(self.rooms, self.weapons, self.people, self.location)
+        self.qtable = qtbl
 
         for i in self.cards:
             if i in self.rooms:
@@ -121,74 +122,136 @@ class Player:
         moves = list(set(moves))
         # do not allow players to be in same hallway tile
         for i in other_players:
-            if board[i.location[0]][i.location[1]] == 0 and i.location in moves:
+            if (board[i.location[0]][i.location[1]] == 0) and (i.location in moves):
                 moves.remove(i.location)
 
         return moves
 
 
-    def make_move(self, board, doors, roll, loc, other_players):
-        '''
-            actions where you win should get a large positive reward
-            actions where you lose should get a large negative reward
-            actions where you learn something should get a small positive reward
-            actions where nothing interesting happens should get no reward
-        '''
+    def make_move(self, board, doors, roll, loc, other_players, sol):
 
         moves = self.get_valid_moves(board, doors, roll, loc, other_players)
-        solution_guesses = self.get_solution_guesses()
-        actions = self.get_valid_actions(board, moves, solution_guesses)
 
-        #make state variable
+        if len(moves) == 0:
+            return None
+
+        actions = self.get_valid_actions(board, moves)
+
         state = self.get_state()
-        print(state)
-        # state = (r, w, p, board[self.location[0]][self.location[1]])
-        
-        print(self.qtable.table[state][actions[1]])
-
-        
-        sys.exit()
         
         #select action
-        max_r = self.qtable.table[state][actions[0]]
-        a = actions[0]
+        max_r = -10000
+        a = []
         for i in actions:
-            if self.qtable.table[state][i] > max_r:
-                max_r = self.qtable.table[state][i]
-                a = i
+            ia = (board[i[0][0]][i[0][1]], i[1], i[2])
+            if self.qtable.table[state][ia] > max_r:
+                max_r = self.qtable.table[state][ia]
+                a = [i]
+            elif self.qtable.table[state][ia] == max_r:
+                a.append(i)
+        #if tie select random move
+        a = a[random.randint(0, len(a) - 1)]
 
-        #make move
+        #explore vs exploit
+        if random.random() > .85:
+            a = actions[random.randint(0, len(actions) - 1)]
+
+        #make move and get reward
+        reward = 0
+        ret_val = None
+        if a[1] == 'n':
+            #in hall
+            self.location = a[0]
+            reward = -5
+        elif a[1] == 's':
+            #guess solution
+            self.location = a[0]
+            if sol == a[2]:
+                reward = 1000
+            else:
+                reward = -1000
+            ret_val = a[2]
+        else:
+            #accusation
+            self.location = a[0]
+            acc = a[2]
+
+            #move accused player to room
+            for i in other_players:
+                if i.character == acc[2]:
+                    i.location = self.location
+                    break
+            
+            learn = False
+            #ask other players for a card
+            for i in other_players:
+                response = i.acc_respond(acc)
+                if response != None:
+                    learn = True
+                    self.record_cards([response])
+                    reward = 20
+                    break
+            if not learn:
+                reward = -20
+                
 
         #get new state
-        #get new state's best action
+        new_state = self.get_state()
 
+        #get all possible next moves
+        new_moves = []
+        for i in range(1,7):
+            new_moves += self.get_valid_moves(board, doors, i, loc, other_players)
+        
+        new_actions = self.get_valid_actions(board, new_moves)
+
+        #select best possible next action
+        new_max_r = -10000
+        new_a = []
+        for i in new_actions:
+            ia = (board[i[0][0]][i[0][1]], i[1], i[2])
+            if self.qtable.table[new_state][ia] > new_max_r:
+                new_max_r = self.qtable.table[new_state][ia]
+                new_a = [i]
+            elif self.qtable.table[new_state][ia] == new_max_r:
+                new_a.append(i)
+        new_action = new_a[random.randint(0, len(new_a) - 1)]
+
+        #generalize actions
+        a = (board[a[0][0]][a[0][1]], a[1], a[2])
+        new_action = (board[new_action[0][0]][new_action[0][1]], new_action[1], new_action[2])
 
         learning_rate = .8
         discount_factor = .95
 
         #update q value
-        self.qtable.table[state][a] = (1-learning_rate)*self.qtable.table[state][a] + learning_rate*(reward(state, a) + discount_factor*self.qtable.table[new_state][new_action])
+        self.qtable.table[state][a] = (1-learning_rate)*self.qtable.table[state][a] + learning_rate*(reward + discount_factor*self.qtable.table[new_state][new_action])
+
+        return ret_val
     
 
-
-    def get_valid_actions(self, board, moves, solution_guesses):
+    def get_valid_actions(self, board, moves):
+        #returns using specific location which is later generalized
+        solution_guesses = self.get_solution_guesses()
         actions = []
+        #an action is = (loc_tup, 'type', guess_tup)
         for i in moves:
             #accusations available for that move
             accusations = self.get_valid_accusations(board, i)
             for j in accusations:
-                #actions.append((i, 'a', j))
-                actions.append(('a', j))
+                if board[i[0]][i[1]] > 0:
+                    actions.append((i, 'a', j))
+                    #actions.append(('a', j))
             
             #solution guesses
             for j in solution_guesses:
-                #actions.append((i, 's', j))
-                actions.append(('s', j))
+                actions.append((i, 's', j))
+                #actions.append(('s', j))
 
             #can do nothing if in hallway
             if board[i[0]][i[1]] == 0:
-                #actions.append((i, 'n', (0, 0, 0)))
-                actions.append(('n', (0, 0, 0)))
+                actions.append((i, 'n', ('0', '0', '0')))
+                #actions.append(('n', (0, 0, 0)))
         return actions
 
 
@@ -249,23 +312,10 @@ class Player:
         
 
     def get_solution_guesses(self):
-        r = []
-        for key in self.rooms:
-            r.append(key)
-
-        w = []
-        for key in self.weapons:
-            w.append(key)
-        
-        p = []
-        for key in self.people:
-            p.append(key)
-
         solutions = []
-
-        for i in r:
-            for j in w:
-                for k in p:
+        for i in self.rooms:
+            for j in self.weapons:
+                for k in self.people:
                     solutions.append((i, j, k))
 
         return solutions

@@ -1,16 +1,28 @@
 from game import Game
+from qTable import QTable
+import time
 
-num_games = 1
-num_players = 1     #between 2 and 6
+num_games = 2000
+num_players = 6     #between 2 and 6
 results = [None]*num_games
+
+rooms = ["Ballroom", "Billiard Room", "Conservatory", "Dining Room", "Hall", "Kitchen", "Library", "Lounge", "Study"]
+weapons = ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"]
 characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
 
+qtbl = QTable(rooms, weapons, characters)
+
+tic = time.time()
 
 for i in range(num_games):
     print("Playing Game:", i+1)
-    game = Game(num_players, playerType='qlearn')
+    game = Game(num_players, qtbl, playerType='qlearn')
     results[i] = game.run_game()
     print()
+
+toc = time.time()
+
+qtbl.write_table()
 
 num_players_left = {}
 character_wins = {}
@@ -32,3 +44,5 @@ for i in num_players_left:
 print("\nStats on which character won")
 for i in character_wins:
     print(i, character_wins[i])
+
+print("\nPlayed", num_games, "games with", num_players, "players in", toc-tic, "seconds.")

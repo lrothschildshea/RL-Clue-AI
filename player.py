@@ -8,7 +8,7 @@ class Player:
         self.rooms = {
             "Ballroom": 0,
             "Billiard Room": 0,
-            "Conservarory": 0,
+            "Conservatory": 0,
             "Dining Room": 0,
             "Hall": 0,
             "Kitchen": 0,
@@ -127,13 +127,16 @@ class Player:
         return moves
 
     # makes random move at the moment
-    def make_move(self, board, doors, roll, loc, other_players):
+    def make_move(self, board, doors, roll, loc, other_players, sol):
         if self.should_guess_solution():
             return self.get_soln_guess()
 
         moves = self.get_valid_moves(board, doors, roll, loc, other_players)
 
-        #if no moves then the player has been boxed in by other players. Game does not seem to be defined for this behavior so do not move.
+        # if no moves game is not defined so turn is over
+        if len(moves) == 0:
+            return None
+
         if len(moves) != 0:
             self.location = moves[random.randint(0, len(moves)-1)]
 
