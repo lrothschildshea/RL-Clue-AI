@@ -2,7 +2,9 @@ from game import Game
 from qTable import QTable
 import time
 
-num_games = 3000
+num_games = 30000
+save_every = 5000
+
 num_players = 6     #between 2 and 6
 results = [None]*num_games
 
@@ -19,10 +21,11 @@ for i in range(num_games):
     game = Game(num_players, qtbl, playerType='qlearn')
     results[i] = game.run_game()
     print()
+    if (i % save_every) == save_every-1:
+        print("writing Q-table to file\n")
+        qtbl.write_table()
 
 toc = time.time()
-
-qtbl.write_table()
 
 num_players_left = {}
 character_wins = {}
