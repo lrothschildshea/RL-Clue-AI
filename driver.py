@@ -18,7 +18,7 @@ tic = time.time()
 
 for i in range(num_games):
     print("Playing Game:", i+1)
-    game = Game(num_players, qtbl, playerType='qlearn')
+    game = Game(num_players, qtbl, numQlearn=6)
     results[i] = game.run_game()
     print()
     if (i % save_every) == save_every-1:

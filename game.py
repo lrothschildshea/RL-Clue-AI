@@ -14,17 +14,21 @@ class Game:
     weapons = ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"]
     characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
 
-    def __init__(self, numberOfPlayers, qtbl, playerType=None):
+    def __init__(self, numberOfPlayers, qtbl, numQlearn=0):
         if numberOfPlayers > 1 and numberOfPlayers < 7:
             self.numPlayers = numberOfPlayers
         
         self.cards, self.solution = Cards(self.numPlayers).deal_cards()
         self.players = []
-        for i in range(self.numPlayers):
-            if playerType == "qlearn":
+        for i in range(numQlearn):
                 self.players.append(QPlayer(self.characters[i], self.cards[i], qtbl))
-            else:
-                self.players.append(Player(self.characters[i], self.cards[i]))
+
+        for i in range(self.numPlayers - numQlearn):
+                self.players.append(Player(self.characters[numQlearn+i], self.cards[i]))
+        
+        for i in self.players:
+            print(type(i))
+            print(i.character)
 
         self.board = self.init_board()
         
