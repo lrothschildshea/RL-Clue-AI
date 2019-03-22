@@ -5,15 +5,15 @@ import random
 class Player:
     def __init__(self, characterName, hand, qtbl):
         self.rooms = {
-            "Ballroom": 0,
+            "Study": 0,
+            "Hall": 0,
+            "Lounge": 0,
+            "Library": 0,
+            "Dining Room": 0,
             "Billiard Room": 0,
             "Conservatory": 0,
-            "Dining Room": 0,
-            "Hall": 0,
-            "Kitchen": 0,
-            "Library": 0,
-            "Lounge": 0,
-            "Study": 0
+            "Ballroom": 0,
+            "Kitchen": 0
         }
         self.weapons = {
             "Candlestick": 0,
@@ -265,6 +265,7 @@ class Player:
         for i in self.weapons:
             if self.weapons[i] == 1:
                 w.append(i)
+        w = tuple(w)
 
         p = 0
         for i in self.people:
