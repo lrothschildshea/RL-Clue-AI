@@ -61,7 +61,7 @@ class Game:
                     print("Solution:", move)
                     return (len(self.players), self.players[self.currentPlayer].character)
                 else:
-                    print("Player ", self.players[self.currentPlayer].character, "has lost!")
+                    #print("Player ", self.players[self.currentPlayer].character, "has lost!")
                     for i in other_players:
                         i.record_cards(self.players[self.currentPlayer].cards)
                     self.players.remove(self.players[self.currentPlayer])
