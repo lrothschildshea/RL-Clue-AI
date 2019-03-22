@@ -40,18 +40,17 @@ class QTable:
 
             # Pair cartesian product of guesses with action type
             print('making actions...')
-            noguess = [(i, 'n', ('0', '0', '0')) for i in range(10)]
-            accuse  = []
-            for i in range(len(rooms)):
-                accuse += list(product([0], ['a'], product([rooms[i]], weapons, people)))
+            noguess = [('n', ('0', '0', '0'))]
 
-            solves  = list(product(range(10), ['s'], guesses))
-            self.actions = noguess + accuse + solves
+            solves  = list(product(['a', 's'], guesses))
+            self.actions = noguess + solves
 
             # Create state space value of rooms, weapon count, and people count
             # location omitted at this time for smaller space
             print('making states...')
             self.states = list(product(all_rooms, all_weapons, all_people))
+
+            print(len(self.actions))
 
             # Create the keys to be used in the QTable dictionary
             # q_states = product(self.states, self.actions)
