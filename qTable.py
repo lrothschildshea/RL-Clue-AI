@@ -48,7 +48,7 @@ class QTable:
             # Create state space value of rooms, weapon count, and people count
             # location omitted at this time for smaller space
             print('making states...')
-            self.states = list(product(all_rooms, all_weapons, all_people))
+            self.states = list(product(all_rooms, all_weapons, list(range(len(people)))))
 
             print(len(self.actions))
 
