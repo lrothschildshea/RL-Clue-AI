@@ -138,16 +138,15 @@ class Player:
         actions = self.get_valid_actions(board, moves)
 
         state = self.get_state()
-        
         #select action
         max_r = -10000
         a = []
         for i in actions:
-            ia = (board[i[0][0]][i[0][1]], i[1], i[2])
-            if self.qtable.table[state][ia] > max_r:
-                max_r = self.qtable.table[state][ia]
+            ia = (i[1], i[2])
+            if self.qtable.table[(state, ia)] > max_r:
+                max_r = self.qtable.table[(state, ia)]
                 a = [i]
-            elif self.qtable.table[state][ia] == max_r:
+            elif self.qtable.table[(state, ia)] == max_r:
                 a.append(i)
         #if tie select random move
         a = a[random.randint(0, len(a) - 1)]
@@ -209,23 +208,23 @@ class Player:
         new_max_r = -10000
         new_a = []
         for i in new_actions:
-            ia = (board[i[0][0]][i[0][1]], i[1], i[2])
-            if self.qtable.table[new_state][ia] > new_max_r:
-                new_max_r = self.qtable.table[new_state][ia]
+            ia = (i[1], i[2])
+            if self.qtable.table[(state, ia)] > new_max_r:
+                new_max_r = self.qtable.table[(state, ia)]
                 new_a = [i]
-            elif self.qtable.table[new_state][ia] == new_max_r:
+            elif self.qtable.table[(state, ia)] == new_max_r:
                 new_a.append(i)
         new_action = new_a[random.randint(0, len(new_a) - 1)]
 
         #generalize actions
-        a = (board[a[0][0]][a[0][1]], a[1], a[2])
-        new_action = (board[new_action[0][0]][new_action[0][1]], new_action[1], new_action[2])
+        a = (a[1], a[2])
+        new_action = (new_action[1], new_action[2])
 
         learning_rate = .8
         discount_factor = .95
 
         #update q value
-        self.qtable.table[state][a] = (1-learning_rate)*self.qtable.table[state][a] + learning_rate*(reward + discount_factor*self.qtable.table[new_state][new_action])
+        self.qtable.table[(state, a)] = (1-learning_rate)*self.qtable.table[(state, a)] + learning_rate*(reward + discount_factor*self.qtable.table[(new_state, new_action)])
 
         return ret_val
     
@@ -262,9 +261,10 @@ class Player:
                 r.append(i)
         r = tuple(r)
 
-        w = 0
+        w = []
         for i in self.weapons:
-            w += self.weapons[i]
+            if self.weapons[i] == 1:
+                w.append(i)
 
         p = 0
         for i in self.people:

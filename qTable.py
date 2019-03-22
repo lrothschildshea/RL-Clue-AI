@@ -13,8 +13,8 @@ class QTable:
             loadable = self.read_table()
             if loadable is not None:
                 self.table = loadable
-                self.states = list(loadable.keys())
-                self.actions = list(loadable[self.states[0]].keys())
+                #self.states = list(loadable.keys())
+                #self.actions = list(loadable[self.states[0]].keys())
             t2 = time.time()
             print("time: %.4f" % (t2 - t1))
 
