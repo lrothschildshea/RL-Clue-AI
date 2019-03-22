@@ -25,6 +25,16 @@ class QTable:
                 cmb = combinations(rooms, i)
                 all_rooms += cmb
 
+            all_weapons = []
+            for i in range(len(weapons)):
+                cmb = combinations(weapons, i)
+                all_weapons += cmb
+
+            all_people = []
+            for i in range(len(people)):
+                cmb = combinations(people, i)
+                all_people += cmb
+
             # Take cartesian product of guessable values for guesses
             guesses = product(rooms, weapons, people)
 
@@ -35,10 +45,11 @@ class QTable:
             # Create state space value of rooms, weapon count, and people count
             # location omitted at this time for smaller space
             print('making states...')
-            self.states = list(product(all_rooms, list(range(len(weapons))), list(range(len(people)))))
+            self.states = list(product(all_rooms, all_weapons, all_people))
 
             # Create the keys to be used in the QTable dictionary
             print('making q_states...')
+            print(len(self.states))
             q_states = product(self.states, self.actions)
             for s in self.states:
                 self.table[s] = {}
