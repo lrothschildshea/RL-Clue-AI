@@ -2,7 +2,7 @@ from game import Game
 from qTable import QTable
 import time
 
-num_games = 30000
+num_games = 30
 save_every = 5000
 
 num_players = 6     #between 2 and 6

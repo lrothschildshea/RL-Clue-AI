@@ -25,10 +25,6 @@ class Game:
 
         for i in range(self.numPlayers - numQlearn):
                 self.players.append(Player(self.characters[numQlearn+i], self.cards[i]))
-        
-        for i in self.players:
-            print(type(i))
-            print(i.character)
 
         self.board = self.init_board()
         
