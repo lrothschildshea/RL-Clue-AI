@@ -143,10 +143,13 @@ class Player:
         a = []
         for i in actions:
             ia = (i[1], i[2])
-            if self.qtable.table[(state, ia)] > max_r:
-                max_r = self.qtable.table[(state, ia)]
+            #if self.qtable.table[(state, ia)] > max_r:
+            if self.qtable.table[state][ia] > max_r:
+                #max_r = self.qtable.table[(state, ia)]
+                max_r = self.qtable.table[state][ia]
                 a = [i]
-            elif self.qtable.table[(state, ia)] == max_r:
+            #elif self.qtable.table[(state, ia)] == max_r:
+            elif self.qtable.table[state][ia] == max_r:
                 a.append(i)
         #if tie select random move
         a = a[random.randint(0, len(a) - 1)]
@@ -209,10 +212,13 @@ class Player:
         new_a = []
         for i in new_actions:
             ia = (i[1], i[2])
-            if self.qtable.table[(state, ia)] > new_max_r:
-                new_max_r = self.qtable.table[(state, ia)]
+            #if self.qtable.table[(state, ia)] > new_max_r:
+            if self.qtable.table[state][ia] > new_max_r:
+                #new_max_r = self.qtable.table[(state, ia)]
+                new_max_r = self.qtable.table[state][ia]
                 new_a = [i]
-            elif self.qtable.table[(state, ia)] == new_max_r:
+            #elif self.qtable.table[(state, ia)] == new_max_r:
+            elif self.qtable.table[state][ia] == new_max_r:
                 new_a.append(i)
         new_action = new_a[random.randint(0, len(new_a) - 1)]
 
@@ -224,7 +230,8 @@ class Player:
         discount_factor = .95
 
         #update q value
-        self.qtable.table[(state, a)] = (1-learning_rate)*self.qtable.table[(state, a)] + learning_rate*(reward + discount_factor*self.qtable.table[(new_state, new_action)])
+        #self.qtable.table[(state, a)] = (1-learning_rate)*self.qtable.table[(state, a)] + learning_rate*(reward + discount_factor*self.qtable.table[(new_state, new_action)])
+        self.qtable.table[state][a] = (1-learning_rate)*self.qtable.table[state][a] + learning_rate*(reward + discount_factor*self.qtable.table[new_state][new_action])
 
         return ret_val
     

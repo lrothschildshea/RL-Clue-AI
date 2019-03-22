@@ -54,8 +54,12 @@ class QTable:
 
             # Create the keys to be used in the QTable dictionary
             # q_states = product(self.states, self.actions)
-            for s in product(self.states, self.actions):
-                self.table[s] = 0
+            #for s in product(self.states, self.actions):
+                #self.table[s] = 0
+            for s in self.states:
+                self.table[s] = {}
+                for a in self.actions:
+                    self.table[s][a] = 0
 
             print('writing to file...')
             self.write_table()
