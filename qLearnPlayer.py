@@ -155,7 +155,7 @@ class Player:
         a = a[random.randint(0, len(a) - 1)]
 
         #explore vs exploit
-        if random.random() > .98:
+        if random.random() > .95:
             a = actions[random.randint(0, len(actions) - 1)]
 
         #make move and get reward
@@ -274,10 +274,15 @@ class Player:
                 w.append(i)
         w = tuple(w)
 
-        p = 0
+        '''p = 0
         for i in self.people:
-            p += self.people[i]
-        
+            p += self.people[i]'''
+        p = []
+        for i in self.people:
+            if self.people[i] == 1:
+                p.append(i)
+        p = tuple(p)
+
         return (r, w, p)
 
 

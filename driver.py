@@ -2,8 +2,8 @@ from game import Game
 from qTable import QTable
 import time
 
-num_games = 1000
-save_every = 1000
+num_games = 15000
+save_every = 5000
 
 num_players = 6     #between 2 and 6
 results = [None]*num_games
