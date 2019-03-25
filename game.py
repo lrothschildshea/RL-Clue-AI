@@ -43,7 +43,7 @@ class Game:
                 print("Player ", self.players[self.currentPlayer].character, "has won!")
                 print("Solution:", self.solution)
                 self.solution_guessed = True
-                return (len(self.players), self.players[self.currentPlayer].character)
+                return (len(self.players), self.players[self.currentPlayer].character, self.turn)
 
             # this is needed in stead of removing current from a copy of players because it maintains the correct order
             other_players = []
@@ -59,7 +59,7 @@ class Game:
                     self.solution_guessed = True
                     print("Player ", self.players[self.currentPlayer].character, "has won!")
                     print("Solution:", move)
-                    return (len(self.players), self.players[self.currentPlayer].character)
+                    return (len(self.players), self.players[self.currentPlayer].character, self.turn)
                 else:
                     #print("Player ", self.players[self.currentPlayer].character, "has lost!")
                     for i in other_players:
