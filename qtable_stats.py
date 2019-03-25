@@ -37,17 +37,24 @@ zero = 0
 nonzero = 0
 count = 0
 
+counter = 0
+print("Starting")
 for i in states:
+    counter += 1
+    if (counter % 1000) == 0:
+        print("State #:", counter)
+
     for j in table[i]:
         total += table[i][j]
         count += 1
-        if table[i][j] != 0:
+        if table[i][j] == 0:
             zero += 1
         else:
             nonzero += 1
 
 
-print(total)
-print(zero)
-print(nonzero)
-print(count)
+print("Total Q:", total)
+print("Num Zeros:", zero)
+print("Num Non-zeros:", nonzero)
+print("Number of entries:", count)
+
