@@ -3,18 +3,19 @@ from qTable import QTable
 import time
 import matplotlib.pyplot as plt
 
-num_games = 1000
+num_games = 10
 save_every = 500
 
 num_players = 6     #between 2 and 6
-numQlearnPlayers = 3
+numQlearnPlayers = 0
 results = [None]*num_games
 
 rooms = ["Study", "Hall", "Lounge", "Library", "Dining Room", "Billiard Room", "Conservatory", "Ballroom", "Kitchen"]
 weapons = ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"]
 characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
 
-qtbl = QTable(rooms, weapons, characters)
+#qtbl = QTable(rooms, weapons, characters)
+qtbl = {}
 
 tic = time.time()
 
@@ -69,7 +70,7 @@ plt.ylabel("Number of Wins")
 plt.xlabel("Player Type")
 
 plt.figure(2)
-plt.plot(range(0, num_games), game_length)
+plt.scatter(range(0, num_games), game_length)
 plt.ylabel("Length of Game")
 plt.xlabel("Iteration")
 plt.title("Length of games during learning")
