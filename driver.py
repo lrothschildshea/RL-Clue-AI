@@ -7,15 +7,14 @@ num_games = 10
 save_every = 500
 
 num_players = 6     #between 2 and 6
-numQlearnPlayers = 0
+numQlearnPlayers = 6
 results = [None]*num_games
 
 rooms = ["Study", "Hall", "Lounge", "Library", "Dining Room", "Billiard Room", "Conservatory", "Ballroom", "Kitchen"]
 weapons = ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"]
 characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
 
-#qtbl = QTable(rooms, weapons, characters)
-qtbl = {}
+qtbl = QTable(rooms, weapons, characters)
 
 tic = time.time()
 
