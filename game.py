@@ -1,5 +1,6 @@
 from cards import Cards
 from qLearnPlayer import Player as QPlayer
+from deepQPlayer import Player as DeepQPlayer
 from player import Player
 import random, sys
 
@@ -14,27 +15,42 @@ class Game:
     weapons = ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"]
     characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
 
-    def __init__(self, numberOfPlayers, qtbl, numQlearn=0):
+    def __init__(self, numberOfPlayers, isTraining, deepQActionSet, qNetworks, qtbl={}, numQlearn=0, numDeepQ=0):
         if numberOfPlayers > 1 and numberOfPlayers < 7:
             self.numPlayers = numberOfPlayers
         
+        self.isTraining = isTraining
+        self.board = self.init_board()
+
+        #door = (hall_loc, room_num, room_loc)
+        self.doors = [((4, 6), 1, (3, 6)), ((4, 8), 2, (4, 9)), ((7, 11), 2, (6, 11)), ((7, 12), 2, (6, 12)), ((6, 17), 3, (5, 17)), ((8, 7), 4, (8, 6)), ((11, 3), 4, (10, 3)), ((8, 17), 5, (9, 17)), ((12, 15), 5, (12, 16)), ((11, 1), 6, (12, 1)), ((15, 6), 6, (15, 5)), ((19, 5), 7, (19, 4)), ((19, 7), 8, (19, 8)), ((16, 9), 8, (17, 9)), ((16, 14), 8, (17, 14)), ((19, 16), 8, (19, 15)), ((17, 19), 9, (18, 19))]
+
         self.cards, self.solution = Cards(self.numPlayers).deal_cards()
         self.players = []
         for i in range(numQlearn):
                 self.players.append(QPlayer(self.characters[i], self.cards[i], qtbl))
 
-        for i in range(self.numPlayers - numQlearn):
-                self.players.append(Player(self.characters[numQlearn+i], self.cards[i]))
+        for i in range(numDeepQ):
+                self.players.append(DeepQPlayer(self.characters[numQlearn+i], self.cards[numQlearn+i], self.board, deepQActionSet, qNetworks))
 
-        self.board = self.init_board()
+        for i in range(self.numPlayers - numQlearn - numDeepQ):
+                self.players.append(Player(self.characters[numQlearn + numDeepQ + i], self.cards[numQlearn + numDeepQ + i]))
         
-        #door = (hall_loc, room_num, room_loc)
-        self.doors = [((4, 6), 1, (3, 6)), ((4, 8), 2, (4, 9)), ((7, 11), 2, (6, 11)), ((7, 12), 2, (6, 12)), ((6, 17), 3, (5, 17)), ((8, 7), 4, (8, 6)), ((11, 3), 4, (10, 3)), ((8, 17), 5, (9, 17)), ((12, 15), 5, (12, 16)), ((11, 1), 6, (12, 1)), ((15, 6), 6, (15, 5)), ((19, 5), 7, (19, 4)), ((19, 7), 8, (19, 8)), ((16, 9), 8, (17, 9)), ((16, 14), 8, (17, 14)), ((19, 16), 8, (19, 15)), ((17, 19), 9, (18, 19))]
-
         
     def run_game(self):
         #while game not over
         while not self.solution_guessed:
+            #exit early if training and training player has already lost
+            if self.isTraining:
+                stillIn = False
+                for i in self.players:
+                    if i.character == "Mr. Green":
+                        stillIn = True
+                        break
+                if not stillIn:
+                    #remove all other players but one to end the game
+                    self.players = [self.players[0]]
+            
             self.turn += 1
             if (self.turn % 10) == 0:
                 print("Turn:", self.turn)
@@ -50,7 +66,7 @@ class Game:
             for i in range(self.currentPlayer + 1, self.currentPlayer + self.numPlayers):
                 i = i % self.numPlayers
                 other_players.append(self.players[i])
-
+            
             #make move
             move = self.players[self.currentPlayer].make_move(self.board, self.doors, self.roll_dice(), self.players[self.currentPlayer].location, other_players, self.solution)
             #if move was to guess solution then handle guess
@@ -70,11 +86,8 @@ class Game:
             self.currentPlayer = (self.currentPlayer + 1) % self.numPlayers
             
 
-
-
     def roll_dice(self):
         return random.randint(1, 6)
-
 
 
     def init_board(self):

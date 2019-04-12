@@ -31,7 +31,6 @@ for i in states:
 pickle_in = open("qtable_init.pickle","rb")
 table = pickle.load(pickle_in)
 
-
 total = 0
 zero = 0
 nonzero = 0
@@ -52,9 +51,7 @@ for i in states:
         else:
             nonzero += 1
 
-
 print("Total Q:", total)
 print("Num Zeros:", zero)
 print("Num Non-zeros:", nonzero)
 print("Number of entries:", count)
-
