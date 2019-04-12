@@ -201,9 +201,7 @@ class Player():
         return moves
 
     def get_action(self, board, doors, roll, loc, other_players, state):
-        #a little sketchy about all of this because not all actions are available from a given state
-        #also doesn't look at available moves
-        threshold = .05 + .85*(math.exp(-1*self.stepsDone/5))
+        threshold = .05 + .9/(math.exp(-1*self.stepsDone/10))
         moves = self.get_valid_moves(board, doors, roll, loc, other_players)
         
         best_mv = None

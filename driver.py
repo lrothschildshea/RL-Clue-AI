@@ -8,8 +8,8 @@ import torch
 import pickle
 from collections import namedtuple
 
-num_games = 100
-save_every = 100
+num_games = 17500
+save_every = 2500
 isTraining = True
 newNetworks = False
 
