@@ -9,8 +9,8 @@ import pickle
 from collections import namedtuple
 import os
 
-num_games = 1000
-save_every = 1000
+num_games = 10
+save_every = 5000
 isTraining = True
 #newNetworks = True
 newNetworks = False
@@ -187,6 +187,7 @@ plt.title("Player's Win Records")
 plt.bar(characters, character_wins.values())
 plt.ylabel("Number of Wins")
 plt.xlabel("Character")
+plt.figure(3).set_size_inches(10, 4.8)
 
 if not os.path.exists("figures"):
         os.mkdir("figures")
