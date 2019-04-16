@@ -69,7 +69,6 @@ class Player():
         self.policy_net = qNetworks[0]
         self.Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
         self.target_net = qNetworks[1]
-        self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
         self.optimizer = optim.RMSprop(self.policy_net.parameters())
         self.memory = qNetworks[2]
@@ -201,7 +200,7 @@ class Player():
         return moves
 
     def get_action(self, board, doors, roll, loc, other_players, state):
-        threshold = .05 + .9/(math.exp(-1*self.stepsDone/10))
+        threshold = .05 + .85/(math.exp(-1*self.stepsDone/5))
         moves = self.get_valid_moves(board, doors, roll, loc, other_players)
         
         best_mv = None
@@ -249,7 +248,7 @@ class Player():
         
 
     def optimize(self):
-        batch_sz = 32
+        batch_sz = 192
         if len(self.memory) < batch_sz:
             return
         
@@ -270,12 +269,12 @@ class Player():
 
         next_state_values = torch.zeros(batch_sz, device=self.device)
         next_state_values[non_final_mask] = self.target_net(non_final_next_states).max(1)[0].detach()
-        expected_state_action_values = (next_state_values * .999) + reward_batch.float().to(self.device)
+        expected_state_action_values = (next_state_values * .9) + reward_batch.float().to(self.device)
 
         loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
         self.optimizer.zero_grad()
         loss.backward()
-        print(loss)
+        print(len(self.memory), loss)
         for param in self.policy_net.parameters():
             param.grad.data.clamp_(-1, 1)
         self.optimizer.step()
@@ -326,7 +325,7 @@ class Player():
                     break
             if not learn:
                 reward = -20
-
+        print(reward)
         reward = torch.tensor([reward], device=self.device)
         newState = self.get_state(other_players, board)
         if gameOver:

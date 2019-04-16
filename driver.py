@@ -7,10 +7,12 @@ from replayMemory import ReplayMemory
 import torch
 import pickle
 from collections import namedtuple
+import os
 
-num_games = 17500
-save_every = 2500
+num_games = 1000
+save_every = 1000
 isTraining = True
+#newNetworks = True
 newNetworks = False
 
 num_players = 6     #between 2 and 6
@@ -26,12 +28,12 @@ characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", 
 
 if not newNetworks:
         nets = pickle.load(open("QNetworks.pickle","rb"))
-        rm = ReplayMemory(10000, namedtuple('Transition', ('state', 'action', 'next_state', 'reward')))
+        rm = ReplayMemory(100000, namedtuple('Transition', ('state', 'action', 'next_state', 'reward')))
         qNetworks = (nets[0], nets[1], rm)
 else:
         n1 = QNetwork(6, 6, 67220).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
         n2 = QNetwork(6, 6, 67220).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-        rm = ReplayMemory(10000, namedtuple('Transition', ('state', 'action', 'next_state', 'reward')))
+        rm = ReplayMemory(100000, namedtuple('Transition', ('state', 'action', 'next_state', 'reward')))
         qNetworks = (n1, n2, rm)
 
 room_map = {
@@ -122,6 +124,9 @@ for i in range(num_games):
         print("writing Q-table to file\n")
         qtbl.write_table()
         '''
+    if (i % 10) == 0:
+        qNetworks[1].load_state_dict(qNetworks[0].state_dict())
+
     if (i % save_every) == save_every-1:
         print("writing Networks\n")
         pickle.dump((qNetworks[0], qNetworks[1]), open("QNetworks.pickle","wb"))
@@ -183,4 +188,9 @@ plt.bar(characters, character_wins.values())
 plt.ylabel("Number of Wins")
 plt.xlabel("Character")
 
-plt.show()
+if not os.path.exists("figures"):
+        os.mkdir("figures")
+
+plt.figure(1).savefig("figures/gamesWonByPlayerType.png")
+plt.figure(2).savefig("figures/gameLength.png")
+plt.figure(3).savefig("figures/gamesWonByCharacter.png")
