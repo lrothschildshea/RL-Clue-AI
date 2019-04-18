@@ -128,8 +128,8 @@ class Player():
                 m[idx - 6][5] = self.rooms[i]
             idx += 1
         
-        m[3][5] = self.stepsDone
-        m[4][5] = board[self.location[0]][self.location[1]]
+        #m[3][5] = self.stepsDone
+        m[3][5] = board[self.location[0]][self.location[1]]
         return torch.from_numpy(np.asarray([np.asarray([m])])).float().to(self.device)
 
     def get_valid_moves(self, board, doors, roll, loc, other_players):

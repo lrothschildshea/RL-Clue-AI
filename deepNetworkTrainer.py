@@ -1,52 +1,23 @@
-from game import Game
-from qTable import QTable
-import time
-import matplotlib.pyplot as plt
-from QNetwork import QNetwork
-from replayMemory import ReplayMemory
-import torch
 import pickle
+from QNetwork import QNetwork
+import torch
+from replayMemory import ReplayMemory
 from collections import namedtuple
-import os
+from cards import Cards
+from deepQPlayer import Player as DeepQPlayer
+from player import Player
+import random
+import time
 
-num_games = 100000
-save_every = 10000
-isTraining = True
+num_games = 10000
+save_every = 1000
+
 #newNetworks = True
 newNetworks = False
 
-num_players = 6     #between 2 and 6
-numQlearnPlayers = 0
-numDeepQLearnPlayers = 1
-results = [None]*num_games
-
-rooms = ["Study", "Hall", "Lounge", "Library", "Dining Room", "Billiard Room", "Conservatory", "Ballroom", "Kitchen"]
+rooms = ["Ballroom", "Billiard Room", "Conservatory", "Dining Room", "Hall", "Kitchen", "Library", "Lounge", "Study"]
 weapons = ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"]
 characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
-
-#qtbl = QTable(rooms, weapons, characters)
-
-if not newNetworks:
-        nets = pickle.load(open("QNetworks.pickle","rb"))
-        rm = ReplayMemory(100000, namedtuple('Transition', ('state', 'action', 'next_state', 'reward')))
-        qNetworks = (nets[0], nets[1], rm)
-else:
-        n1 = QNetwork(6, 6, 67220).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-        n2 = QNetwork(6, 6, 67220).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
-        rm = ReplayMemory(100000, namedtuple('Transition', ('state', 'action', 'next_state', 'reward')))
-        qNetworks = (n1, n2, rm)
-
-room_map = {
-        1: "Study",
-        2: "Hall",
-        3: "Lounge",
-        4: "Library",
-        5: "Dining Room",
-        6: "Billiard Room",
-        7: "Conservatory",
-        8: "Ballroom",
-        9: "Kitchen"
-}
 
 board = [None]*25
 board[0] = [1,1,1,1,1,1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1,0,-1,3,3,3,3,3,3]
@@ -74,6 +45,20 @@ board[21] = [7,7,7,7,7,7,0,0,8,8,8,8,8,8,8,8,0,0,9,9,9,9,9,9]
 board[22] = [7,7,7,7,7,7,0,0,8,8,8,8,8,8,8,8,0,0,9,9,9,9,9,9]
 board[23] = [7,7,7,7,7,7,-1,0,0,0,8,8,8,8,0,0,0,-1,9,9,9,9,9,9]
 board[24] = [-1,-1,-1,-1,-1,-1,-1,-1,-1,0,-1,-1,-1,-1,0,-1,-1,-1,-1,-1,-1,-1,-1,-1]
+
+doors = [((4, 6), 1, (3, 6)), ((4, 8), 2, (4, 9)), ((7, 11), 2, (6, 11)), ((7, 12), 2, (6, 12)), ((6, 17), 3, (5, 17)), ((8, 7), 4, (8, 6)), ((11, 3), 4, (10, 3)), ((8, 17), 5, (9, 17)), ((12, 15), 5, (12, 16)), ((11, 1), 6, (12, 1)), ((15, 6), 6, (15, 5)), ((19, 5), 7, (19, 4)), ((19, 7), 8, (19, 8)), ((16, 9), 8, (17, 9)), ((16, 14), 8, (17, 14)), ((19, 16), 8, (19, 15)), ((17, 19), 9, (18, 19))]
+
+room_map = {
+        1: "Study",
+        2: "Hall",
+        3: "Lounge",
+        4: "Library",
+        5: "Dining Room",
+        6: "Billiard Room",
+        7: "Conservatory",
+        8: "Ballroom",
+        9: "Kitchen"
+}
 
 deepQActionSet = {}
 room_squares = [(3, 6), (4, 9), (6, 11), (6, 12), (5, 17), (8, 6), (10, 3), (9, 17), (12, 16), (12, 1), (15, 5), (19, 4), (19, 8), (17, 9), (17, 14), (19, 15), (18, 19)]
@@ -106,92 +91,107 @@ for i in range(len(board)):
                                                 deepQActionSet[count] = ((i,j), 'n', ('0', '0', '0'))
                                                 count += 1
                                                 add_nothing = False
-#i believe there are ~3000 duiplicate actions (some rooms have multiple allowable locations) in self.actions but that is a problem for a different day
 
-#play games
+
+if not newNetworks:
+        nets = pickle.load(open("QNetworks.pickle","rb"))
+        rm = ReplayMemory(100000, namedtuple('Transition', ('state', 'action', 'next_state', 'reward')))
+        qNetworks = (nets[0], nets[1], rm)
+else:
+        n1 = QNetwork(6, 6, 67220).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        n2 = QNetwork(6, 6, 67220).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        rm = ReplayMemory(100000, namedtuple('Transition', ('state', 'action', 'next_state', 'reward')))
+        qNetworks = (n1, n2, rm)
+
 tic = time.time()
-
+#training loop
 for i in range(num_games):
-    print("Playing Game:", i+1)
-    if numQlearnPlayers > 0:
-        game = Game(num_players, isTraining, deepQActionSet, qNetworks, qtbl=qtbl, numQlearn=numQlearnPlayers)
-    else:
-            game = Game(num_players, isTraining, deepQActionSet, qNetworks, numDeepQ=numDeepQLearnPlayers)
-    results[i] = game.run_game()
-    print()
-    '''
-    if (i % save_every) == save_every-1:
-        print("writing Q-table to file\n")
-        qtbl.write_table()
-        '''
-    if (i % 10) == 0:
+
+    cards, solution = Cards(6).deal_cards()
+    players = []
+    players.append(DeepQPlayer(characters[0], cards[0], board, deepQActionSet, qNetworks))
+    other_cards = []
+    for j in range(1,6):
+        players.append(Player(characters[j], cards[j]))
+        other_cards += cards[j]
+    
+    learned_cards = []
+    #give random cards
+    for j in other_cards:
+        if random.random() > .5:
+            learned_cards.append(j)
+    
+    players[0].record_cards(learned_cards)
+    
+    #move to random spot on board
+    room = random.randint(0, 9)
+    if room == 0:
+        l1 = random.randint(0,24)
+        l2 = random.randint(0,23)
+        while board[l1][l2] != 0:
+            l1 = random.randint(0,24)
+            l2 = random.randint(0,23)
+        loc = (l1, l2)
+
+    elif room == 1:
+        loc = (3, 6)
+
+    elif room == 2:
+        rand = random.random()
+        if rand < .34:
+            loc = (4, 9)
+        elif rand < .67:
+            loc = (6, 11)
+        else:
+            loc = (6, 12)
+
+    elif room == 3:
+        loc = (5,17)
+
+    elif room == 4:
+        if random.random() > .5:
+            loc = (8, 6)
+        else:
+            loc = (10, 3)
+
+    elif room == 5:
+        if random.random() > .5:
+            loc = (9, 17)
+        else:
+            loc = (12, 16)
+
+    elif room == 6:
+        if random.random() > .5:
+            loc = (12, 1)
+        else:
+            loc = (15, 5)
+
+    elif room == 7:
+        loc = (19, 4)
+
+    elif room == 8:
+        rand = random.random()
+        if rand < .25:
+            loc = (19, 8)
+        elif rand < .5:
+            loc = (17, 9)
+        elif rand < .75:
+            loc = (17,14)
+        else:
+            loc = (19,15)
+
+    elif room == 9:
+        loc = (18,19)
+
+    players[0].location = loc
+
+    players[0].make_move(board, doors, random.randint(1, 6), players[0].location, players[1:], solution)
+
+    if (i % 32) == 0:
         qNetworks[1].load_state_dict(qNetworks[0].state_dict())
 
-    if (i % save_every) == save_every-1:
-        print("Writing Networks\n")
+    if (i % save_every) == (save_every - 1):
+        toc = time.time()
+        print("Writing Networks    Iteration:", i+1, "    Time:", toc - tic, "Seconds")
         pickle.dump((qNetworks[0], qNetworks[1]), open("QNetworks.pickle","wb"))
-
-toc = time.time()
-
-num_players_left = {}
-character_wins = {}
-game_length = []
-
-for i in range(1, num_players + 1):
-    num_players_left[i] = 0
-
-for i in characters:
-    character_wins[i] = 0
-
-for i in results:
-    num_players_left[i[0]] += 1
-    character_wins[i[1]] += 1
-    game_length.append(i[2])
-
-print("\nStats on how the game ended")
-for i in num_players_left:
-    print(i, num_players_left[i])
-
-print("\nStats on which character won")
-for i in character_wins:
-    print(i, character_wins[i])
-
-print("\nPlayed", num_games, "games with", num_players, "players in", toc-tic, "seconds.")
-
-qsum = 0
-dqsum = 0
-rsum = 0
-for i in range(numQlearnPlayers):
-        qsum += character_wins[characters[i]]
-
-for i in range(numQlearnPlayers, numDeepQLearnPlayers):
-        dqsum += character_wins[characters[i]]
-
-for i in range(numQlearnPlayers + numDeepQLearnPlayers, num_players):
-        rsum += character_wins[characters[i]]
-
-plt.figure(1)
-plt.title("Number of Wins out of %d Games" % num_games)
-plt.bar(["Q-learn Player", "Deep Q-learn Player","Random Player"], [qsum, dqsum, rsum])
-plt.ylabel("Number of Wins")
-plt.xlabel("Player Type")
-
-plt.figure(2)
-plt.scatter(range(0, num_games), game_length)
-plt.ylabel("Length of Game")
-plt.xlabel("Iteration")
-plt.title("Length of games during learning")
-
-plt.figure(3)
-plt.title("Player's Win Records")
-plt.bar(characters, character_wins.values())
-plt.ylabel("Number of Wins")
-plt.xlabel("Character")
-plt.figure(3).set_size_inches(10, 4.8)
-
-if not os.path.exists("figures"):
-        os.mkdir("figures")
-
-plt.figure(1).savefig("figures/gamesWonByPlayerType.png")
-plt.figure(2).savefig("figures/gameLength.png")
-plt.figure(3).savefig("figures/gamesWonByCharacter.png")
+        tic = time.time()
