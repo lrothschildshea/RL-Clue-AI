@@ -9,7 +9,72 @@ from player import Player
 import random
 import time
 
-num_games = 10000
+def get_random_loc():
+    room = random.randint(0, 9)
+    if room == 0:
+        l1 = random.randint(0,24)
+        l2 = random.randint(0,23)
+        while board[l1][l2] != 0:
+            l1 = random.randint(0,24)
+            l2 = random.randint(0,23)
+        loc = (l1, l2)
+
+    elif room == 1:
+        loc = (3, 6)
+
+    elif room == 2:
+        rand = random.random()
+        if rand < .34:
+            loc = (4, 9)
+        elif rand < .67:
+            loc = (6, 11)
+        else:
+            loc = (6, 12)
+
+    elif room == 3:
+        loc = (5,17)
+
+    elif room == 4:
+        if random.random() > .5:
+            loc = (8, 6)
+        else:
+            loc = (10, 3)
+
+    elif room == 5:
+        if random.random() > .5:
+            loc = (9, 17)
+        else:
+            loc = (12, 16)
+
+    elif room == 6:
+        if random.random() > .5:
+            loc = (12, 1)
+        else:
+            loc = (15, 5)
+
+    elif room == 7:
+        loc = (19, 4)
+
+    elif room == 8:
+        rand = random.random()
+        if rand < .25:
+            loc = (19, 8)
+        elif rand < .5:
+            loc = (17, 9)
+        elif rand < .75:
+            loc = (17,14)
+        else:
+            loc = (19,15)
+
+    elif room == 9:
+        loc = (18,19)
+
+    return loc
+
+
+
+
+num_games = 1000
 save_every = 1000
 
 #newNetworks = True
@@ -110,10 +175,14 @@ for i in range(num_games):
     cards, solution = Cards(6).deal_cards()
     players = []
     players.append(DeepQPlayer(characters[0], cards[0], board, deepQActionSet, qNetworks))
+    players[0].location = get_random_loc()
+
     other_cards = []
     for j in range(1,6):
         players.append(Player(characters[j], cards[j]))
         other_cards += cards[j]
+        #move to random spot on board
+        players[j].location = get_random_loc()
     
     learned_cards = []
     #give random cards
@@ -122,68 +191,6 @@ for i in range(num_games):
             learned_cards.append(j)
     
     players[0].record_cards(learned_cards)
-    
-    #move to random spot on board
-    room = random.randint(0, 9)
-    if room == 0:
-        l1 = random.randint(0,24)
-        l2 = random.randint(0,23)
-        while board[l1][l2] != 0:
-            l1 = random.randint(0,24)
-            l2 = random.randint(0,23)
-        loc = (l1, l2)
-
-    elif room == 1:
-        loc = (3, 6)
-
-    elif room == 2:
-        rand = random.random()
-        if rand < .34:
-            loc = (4, 9)
-        elif rand < .67:
-            loc = (6, 11)
-        else:
-            loc = (6, 12)
-
-    elif room == 3:
-        loc = (5,17)
-
-    elif room == 4:
-        if random.random() > .5:
-            loc = (8, 6)
-        else:
-            loc = (10, 3)
-
-    elif room == 5:
-        if random.random() > .5:
-            loc = (9, 17)
-        else:
-            loc = (12, 16)
-
-    elif room == 6:
-        if random.random() > .5:
-            loc = (12, 1)
-        else:
-            loc = (15, 5)
-
-    elif room == 7:
-        loc = (19, 4)
-
-    elif room == 8:
-        rand = random.random()
-        if rand < .25:
-            loc = (19, 8)
-        elif rand < .5:
-            loc = (17, 9)
-        elif rand < .75:
-            loc = (17,14)
-        else:
-            loc = (19,15)
-
-    elif room == 9:
-        loc = (18,19)
-
-    players[0].location = loc
 
     players[0].make_move(board, doors, random.randint(1, 6), players[0].location, players[1:], solution)
 
