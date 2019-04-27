@@ -10,6 +10,7 @@ from collections import namedtuple
 
 class Player():
     def __init__(self, characterName, hand, board, actionSet, qNetworks):
+        self.type = "Deep Q"
         self.rooms = {
             "Study": 0,
             "Hall": 0,
@@ -274,7 +275,6 @@ class Player():
         loss = F.smooth_l1_loss(state_action_values, expected_state_action_values.unsqueeze(1))
         self.optimizer.zero_grad()
         loss.backward()
-        print(len(self.memory), loss)
         for param in self.policy_net.parameters():
             param.grad.data.clamp_(-1, 1)
         self.optimizer.step()
@@ -325,7 +325,6 @@ class Player():
                     break
             if not learn:
                 reward = -20
-        print(reward)
         reward = torch.tensor([reward], device=self.device)
         newState = self.get_state(other_players, board)
         if gameOver:

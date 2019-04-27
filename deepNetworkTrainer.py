@@ -71,14 +71,11 @@ def get_random_loc():
 
     return loc
 
+num_games = 20000
+save_every = 5000
 
-
-
-num_games = 1000
-save_every = 1000
-
-#newNetworks = True
-newNetworks = False
+newNetworks = True
+#newNetworks = False
 
 rooms = ["Ballroom", "Billiard Room", "Conservatory", "Dining Room", "Hall", "Kitchen", "Library", "Lounge", "Study"]
 weapons = ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"]

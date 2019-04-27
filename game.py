@@ -6,7 +6,6 @@ import random, sys
 
 class Game:
 
-    numPlayers = 2
     currentPlayer = 0
     solution_guessed = False
     turn = 0
@@ -15,11 +14,10 @@ class Game:
     weapons = ["Candlestick", "Knife", "Lead Pipe", "Revolver", "Rope", "Wrench"]
     characters = ["Mr. Green", "Colonel Mustard", "Mrs. Peacock", "Professor Plum", "Ms. Scarlet", "Mrs. White"]
 
-    def __init__(self, numberOfPlayers, isTraining, deepQActionSet, qNetworks, qtbl={}, numQlearn=0, numDeepQ=0):
+    def __init__(self, numberOfPlayers, deepQActionSet, qNetworks, qtbl={}, numQlearn=0, numDeepQ=0):
         if numberOfPlayers > 1 and numberOfPlayers < 7:
             self.numPlayers = numberOfPlayers
         
-        self.isTraining = isTraining
         self.board = self.init_board()
 
         #door = (hall_loc, room_num, room_loc)
@@ -40,18 +38,12 @@ class Game:
     def run_game(self):
         #while game not over
         while not self.solution_guessed:
-            #exit early if training and training player has already lost
-            if self.isTraining:
-                stillIn = False
-                for i in self.players:
-                    if i.character == "Mr. Green":
-                        stillIn = True
-                        break
-                if not stillIn:
-                    #remove all other players but one to end the game
-                    self.players = [self.players[0]]
-            
             self.turn += 1
+            if(self.turn > 5000):
+                #assume random players not making progress so end game by removing all but 1 players
+                self.players = [self.players[0]]
+                self.currentPlayer = 0
+
             if (self.turn % 10) == 0:
                 print("Turn:", self.turn)
             if len(self.players) == 1:
@@ -77,7 +69,7 @@ class Game:
                     print("Solution:", move)
                     return (len(self.players), self.players[self.currentPlayer].character, self.turn)
                 else:
-                    #print("Player ", self.players[self.currentPlayer].character, "has lost!")
+                    print("Player ", self.players[self.currentPlayer].character, "has lost!   (Player Type:" + self.players[self.currentPlayer].type + ")")
                     for i in other_players:
                         i.record_cards(self.players[self.currentPlayer].cards)
                     self.players.remove(self.players[self.currentPlayer])

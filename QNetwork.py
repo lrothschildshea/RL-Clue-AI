@@ -7,8 +7,10 @@ import torchvision.transforms as T
 class QNetwork(nn.Module):
     def __init__(self, h, w, outputs):
         super(QNetwork, self).__init__()
-        self.l1 = nn.Linear(h*w, 1000)
-        self.l2 = nn.Linear(1000, outputs)
+        self.l1 = nn.Linear(h*w, 750)
+        self.l2 = nn.Linear(750, 1000)
+        self.l3 = nn.Linear(1000, 1500)
+        self.l4 = nn.Linear(1500, outputs)
 
     def forward(self, x):
-        return self.l2(F.relu(self.l1(x.view(x.size(0), -1))))
+        return self.l4(F.relu(self.l3(self.l2(F.relu(self.l1(x.view(x.size(0), -1)))))))

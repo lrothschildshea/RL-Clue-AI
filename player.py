@@ -5,6 +5,7 @@ import random
 class Player:
 
     def __init__(self, characterName, hand):
+        self.type = "Random"
         self.rooms = {
             "Ballroom": 0,
             "Billiard Room": 0,
