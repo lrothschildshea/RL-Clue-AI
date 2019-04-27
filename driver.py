@@ -13,7 +13,7 @@ num_games = 100
 save_every = 5000
 isTraining = True
 
-print("How many Q-Learnging Players? (0 - 6)")
+print("How many Q-Learnging Players? (0 - 6)    WARNING: Picking a number larger than 0 requires your computer to have 35GB+ of RAM")
 numQlearnPlayers = int(input())
 if numQlearnPlayers > 6:
         numQlearnPlayers = 6
@@ -24,8 +24,6 @@ else:
         numDeepQLearnPlayers = int(input())
         if numDeepQLearnPlayers > 6 - numQlearnPlayers:
                 numDeepQLearnPlayers = 6 - numQlearnPlayers
-
-
 
 print("How many games would you like to be played?")
 num_games = int(input())
@@ -206,4 +204,4 @@ plt.figure(1).savefig("figures/gamesWonByPlayerType.png")
 plt.figure(2).savefig("figures/gameLength.png")
 plt.figure(3).savefig("figures/gamesWonByCharacter.png")
 
-print("Graphs Saved to figures directory")
+print("Graphs Saved to the figures directory")
