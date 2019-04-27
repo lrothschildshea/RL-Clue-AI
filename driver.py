@@ -10,7 +10,7 @@ from collections import namedtuple
 import os
 
 num_games = 100
-save_every = 10000
+save_every = 5000
 isTraining = True
 
 print("How many Q-Learnging Players? (0 - 6)")
@@ -53,6 +53,8 @@ if numDeepQLearnPlayers > 0:
                 n2 = QNetwork(6, 6, 67220).to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
                 rm = ReplayMemory(100000, namedtuple('Transition', ('state', 'action', 'next_state', 'reward')))
                 qNetworks = (n1, n2, rm)
+else:
+        qNetworks = ()
 
 room_map = {
         1: "Study",
