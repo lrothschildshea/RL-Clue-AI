@@ -13,4 +13,4 @@ class QNetwork(nn.Module):
         self.l4 = nn.Linear(1500, outputs)
 
     def forward(self, x):
-        return self.l4(F.relu(self.l3(self.l2(F.relu(self.l1(x.view(x.size(0), -1)))))))
+        return self.l4(F.relu(self.l3(torch.tanh(self.l2(F.relu(self.l1(x.view(x.size(0), -1))))))))
