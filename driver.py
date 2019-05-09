@@ -10,7 +10,7 @@ from collections import namedtuple
 import os
 
 num_games = 100
-save_every = 5000
+save_every = 100
 isTraining = True
 
 print("How many Q-Learnging Players? (0 - 6)    WARNING: Picking a number larger than 0 requires your computer to have 35GB+ of RAM")

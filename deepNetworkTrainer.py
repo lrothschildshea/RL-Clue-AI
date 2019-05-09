@@ -71,8 +71,8 @@ def get_random_loc():
 
     return loc
 
-num_games = 20000
-save_every = 5000
+num_games = 100
+save_every = 100
 
 newNetworks = True
 #newNetworks = False
